@@ -1,6 +1,6 @@
 class StandingIntentsController < ApplicationController
   def index
-    @intents = StandingIntent.for_visitor(visitor_id).order(created_at: :desc)
+    @intents = StandingIntent.active.for_visitor(visitor_id).order(created_at: :desc)
   end
 
   def new
@@ -8,6 +8,10 @@ class StandingIntentsController < ApplicationController
   end
 
   def create
+    if params[:request_text].blank?
+      redirect_to standing_intents_path, alert: "Please enter a commodity description." and return
+    end
+
     parsed = IntentParserService.parse(params[:request_text])
 
     @intent = StandingIntent.new(
@@ -22,7 +26,7 @@ class StandingIntentsController < ApplicationController
     else
       render :new, status: :unprocessable_entity
     end
-  rescue IntentParserService::ParseError => e
+  rescue IntentParserService::ParseError, Aws::BedrockRuntime::Errors::ServiceError => e
     flash.now[:alert] = "Could not identify a commodity: #{e.message}"
     @intent = StandingIntent.new
     render :new, status: :unprocessable_entity
