@@ -24,6 +24,7 @@ services:
       - "3010:3000"
     environment:
       RAILS_ENV: development
+      BUNDLE_WITHOUT: ""
       DB_HOST: postgres
       DB_USERNAME: ott_agent
       DB_PASSWORD: password
@@ -47,6 +48,7 @@ services:
       - .:/app
     environment:
       RAILS_ENV: development
+      BUNDLE_WITHOUT: ""
       DB_HOST: postgres
       DB_USERNAME: ott_agent
       DB_PASSWORD: password

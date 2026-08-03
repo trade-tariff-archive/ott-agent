@@ -21,6 +21,8 @@ RUN bundle install --jobs=4 --no-binstubs
 
 COPY . /app/
 
+RUN SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production bundle exec rails assets:precompile
+
 RUN rm -rf log tmp \
   && rm -rf /usr/local/bundle/cache \
   && rm -rf .env \
