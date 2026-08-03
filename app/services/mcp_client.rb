@@ -5,10 +5,11 @@ class McpClient
 
   @cached_token     = nil
   @token_expires_at = nil
+  @token_mutex      = Mutex.new
 
   def self.list_tools
     response = post({ method: "tools/list", params: {}, id: 1 })
-    response.dig("result", "tools").map { |tool| to_bedrock_tool(tool) }
+    (response.dig("result", "tools") || []).map { |tool| to_bedrock_tool(tool) }
   end
 
   def self.call_tool(name, arguments)
@@ -46,9 +47,11 @@ class McpClient
   def self.bearer_token
     return nil unless client_id.present? && client_secret.present?
 
-    if @cached_token.nil? || Time.current >= @token_expires_at
-      @cached_token     = fetch_hub_token
-      @token_expires_at = parse_expiry(@cached_token)
+    @token_mutex.synchronize do
+      if @cached_token.nil? || Time.current >= @token_expires_at
+        @cached_token     = fetch_hub_token
+        @token_expires_at = parse_expiry(@cached_token)
+      end
     end
 
     @cached_token
