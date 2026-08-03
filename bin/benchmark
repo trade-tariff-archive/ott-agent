@@ -1,0 +1,107 @@
+#!/usr/bin/env ruby
+# ott-agent/bin/benchmark
+# frozen_string_literal: true
+
+require_relative "../config/environment"
+require "csv"
+
+BENCHMARK_QUERIES = [
+  { query: "What is the full description and duty rate for commodity 0101210000?",           category: "commodity_lookup" },
+  { query: "Look up commodity code 0303890000 and tell me its import duties.",               category: "commodity_lookup" },
+  { query: "What import restrictions apply to commodity 2204109800?",                        category: "commodity_lookup" },
+  { query: "What is the VAT treatment for commodity 8703800000?",                            category: "commodity_lookup" },
+  { query: "I'm importing fresh strawberries. What commodity code should I use?",            category: "classification" },
+  { query: "Classify uncooked frozen chicken breasts intended for retail sale.",              category: "classification" },
+  { query: "What is the 10-digit commodity code for new passenger cars with 1500cc engine?", category: "classification" },
+  { query: "Calculate the import duty and VAT for 500kg of fresh salmon from Norway.",       category: "duty_calculation" },
+  { query: "What duties apply to importing 1000 litres of red wine from France?",            category: "duty_calculation" },
+  { query: "Calculate the duty on 200 units of mobile phones (HS 8517) from China.",        category: "duty_calculation" },
+  { query: "What are the rules of origin for importing tomatoes from Morocco to the UK?",    category: "rules_of_origin" },
+  { query: "Do UK-EU trade rules apply to cotton T-shirts from Bangladesh?",                 category: "rules_of_origin" },
+  { query: "What is the current status of tariff quota 050001?",                             category: "quotas" },
+  { query: "List any open quotas for importing cheese from the EU.",                         category: "quotas" },
+  { query: "Have there been any duty changes for commodity 0101210000 in the last 90 days?", category: "history" },
+  { query: "Show me recent tariff measure changes for heading 0302.",                        category: "history" },
+  { query: "What is the current EUR/GBP exchange rate used for customs purposes?",           category: "exchange_rates" },
+  { query: "Which countries are in the GSP preference group?",                               category: "geo_areas" },
+  { query: "What sections of the tariff cover live animals and animal products?",            category: "navigation" },
+  { query: "Navigate to heading 0302 and list its subheadings.",                             category: "navigation" }
+].freeze
+
+def run_benchmark
+  visitor_id  = SecureRandom.uuid
+  results     = []
+  total_start = Time.current
+
+  puts "\nOTT Agent Benchmark — #{BENCHMARK_QUERIES.length} queries"
+  puts "Interactive model: #{AgentService::INTERACTIVE_MODEL}"
+  puts "MCP URL: #{ENV.fetch('MCP_URL', 'not set')}"
+  puts "=" * 80
+
+  BENCHMARK_QUERIES.each_with_index do |item, i|
+    print "#{i + 1}/#{BENCHMARK_QUERIES.length} [#{item[:category]}] #{item[:query].truncate(60)}... "
+
+    conversation = Conversation.create!(visitor_id: visitor_id, title: "Benchmark #{i + 1}")
+    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+    begin
+      message = AgentService.run(conversation, item[:query])
+      latency = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+
+      results << {
+        index:        i + 1,
+        category:     item[:category],
+        query:        item[:query],
+        success:      true,
+        latency:      latency.round(2),
+        input_tokens:  message.input_tokens,
+        output_tokens: message.output_tokens,
+        total_tokens:  message.input_tokens + message.output_tokens,
+        error:         nil
+      }
+      puts "OK (#{latency.round(1)}s, #{results.last[:total_tokens]} tokens)"
+    rescue StandardError => e
+      latency = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+      results << {
+        index: i + 1, category: item[:category], query: item[:query],
+        success: false, latency: latency.round(2),
+        input_tokens: 0, output_tokens: 0, total_tokens: 0, error: e.message
+      }
+      puts "FAIL — #{e.message.truncate(60)}"
+    end
+  end
+
+  print_summary(results, Time.current - total_start)
+  write_csv(results)
+end
+
+def print_summary(results, total_elapsed)
+  successful   = results.count { |r| r[:success] }
+  total_tokens = results.sum { |r| r[:total_tokens] }
+  avg_latency  = results.sum { |r| r[:latency] } / results.length
+
+  puts "\n" + "=" * 80
+  puts "SUMMARY"
+  puts "=" * 80
+  puts "Queries:      #{results.length}"
+  puts "Succeeded:    #{successful} (#{(successful * 100.0 / results.length).round(1)}%)"
+  puts "Failed:       #{results.length - successful}"
+  puts "Total tokens: #{total_tokens.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}"
+  puts "Avg tokens/q: #{(total_tokens.to_f / results.length).round(0)}"
+  puts "Avg latency:  #{avg_latency.round(2)}s"
+  puts "Total time:   #{total_elapsed.round(1)}s"
+  puts ""
+
+  results.group_by { |r| r[:category] }.each do |cat, cat_results|
+    ok = cat_results.count { |r| r[:success] }
+    puts "  #{cat.ljust(20)} #{ok}/#{cat_results.length} succeeded"
+  end
+end
+
+def write_csv(results)
+  path = Rails.root.join("tmp", "benchmark_results.csv")
+  CSV.open(path, "w") { |csv| csv << results.first.keys; results.each { |r| csv << r.values } }
+  puts "\nCSV written to #{path}"
+end
+
+run_benchmark
