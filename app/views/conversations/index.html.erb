@@ -1,0 +1,23 @@
+<h1 class="govuk-heading-l">Your conversations</h1>
+
+<%= form_with url: conversations_path, method: :post do |f| %>
+  <%= f.govuk_text_field :title, label: { text: "Start a new conversation" },
+      hint: { text: "Give it a title, or leave blank" } %>
+  <%= f.govuk_submit "Start conversation" %>
+<% end %>
+
+<% if @conversations.any? %>
+  <ul class="govuk-list">
+    <% @conversations.each do |conversation| %>
+      <li>
+        <%= link_to conversation.title, conversation_path(conversation), class: "govuk-link" %>
+        <span class="govuk-hint govuk-!-margin-left-2">
+          <%= pluralize(conversation.messages.count, "message") %> ·
+          <%= number_with_delimiter(conversation.total_tokens) %> tokens total
+        </span>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="govuk-body">No conversations yet.</p>
+<% end %>
