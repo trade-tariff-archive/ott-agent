@@ -1,6 +1,6 @@
 class AgentResponseJob
   include Sidekiq::Job
-  sidekiq_options retry: 2
+  sidekiq_options retry: false
 
   def perform(conversation_id)
     conversation = Conversation.find(conversation_id)
