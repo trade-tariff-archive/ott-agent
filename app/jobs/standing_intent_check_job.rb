@@ -14,9 +14,9 @@ class StandingIntentCheckJob
   private
 
   def check_intent(intent)
-    diff_text  = McpClient.call_tool("commodity_history_diff", {
+    diff_text = McpClient.call_tool("commodity_history_diff", {
       "commodity_code" => intent.commodity_code,
-      "days"           => DIFF_WINDOW_DAYS
+      "from_date"      => DIFF_WINDOW_DAYS.days.ago.to_date.to_s
     })
     new_digest = Digest::SHA256.hexdigest(diff_text)
     changed    = new_digest != intent.last_result_digest

@@ -11,7 +11,10 @@ RSpec.describe StandingIntentCheckJob, type: :job do
 
   before do
     allow(McpClient).to receive(:call_tool)
-      .with("commodity_history_diff", hash_including("commodity_code" => "0101210000"))
+      .with("commodity_history_diff", {
+        "commodity_code" => "0101210000",
+        "from_date"      => StandingIntentCheckJob::DIFF_WINDOW_DAYS.days.ago.to_date.to_s
+      })
       .and_return(diff_result)
   end
 

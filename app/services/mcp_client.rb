@@ -9,6 +9,7 @@ class McpClient
 
   def self.list_tools
     response = post({ method: "tools/list", params: {}, id: 1 })
+    raise Error, "tools/list failed: #{response["error"]}" if response["error"]
     (response.dig("result", "tools") || []).map { |tool| to_bedrock_tool(tool) }
   end
 
@@ -21,10 +22,15 @@ class McpClient
 
     raise Error, response.dig("error", "message") if response["error"]
 
-    response
-      .dig("result", "content")
-      .select { |block| block["type"] == "text" }
-      .map    { |block| block["text"] }
+    if response.dig("result", "isError")
+      error_text = (response.dig("result", "content") || [])
+                     .filter_map { |c| c["text"] }
+                     .join("\n")
+      raise Error, "Tool #{name} returned error: #{error_text}"
+    end
+
+    (response.dig("result", "content") || [])
+      .filter_map { |c| c["text"] }
       .join("\n")
   end
 
@@ -41,6 +47,8 @@ class McpClient
     headers["Authorization"] = "Bearer #{token}" if token
 
     conn.post("/", body.merge(jsonrpc: "2.0").to_json, headers).body
+  rescue Faraday::Error => e
+    raise Error, "MCP request failed: #{e.message}"
   end
   private_class_method :post
 

@@ -19,9 +19,23 @@ RSpec.describe AgentResponseJob, type: :job do
       expect(AgentService).to have_received(:respond).with(conversation)
     end
 
-    it "raises ActiveRecord::RecordNotFound for an unknown conversation_id" do
-      expect { described_class.new.perform(999_999) }
-        .to raise_error(ActiveRecord::RecordNotFound)
+    it "does not raise for an unknown conversation_id (error is logged)" do
+      expect(Rails.logger).to receive(:error).with(/999999/)
+      expect { described_class.new.perform(999_999) }.not_to raise_error
+    end
+
+    context "when AgentService.respond raises" do
+      it "creates an error assistant message on the conversation" do
+        allow(AgentService).to receive(:respond).and_raise(StandardError, "Bedrock throttled")
+
+        expect {
+          described_class.new.perform(conversation.id)
+        }.to change { conversation.messages.count }.by(1)
+
+        error_message = conversation.messages.order(:created_at).last
+        expect(error_message.role).to eq("assistant")
+        expect(error_message.content).to include("couldn't complete that request")
+      end
     end
   end
 end

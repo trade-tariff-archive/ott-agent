@@ -93,6 +93,22 @@ RSpec.describe McpClient do
       McpClient.list_tools
       expect(WebMock).to have_requested(:post, hub_token_url).once
     end
+
+    context "when the MCP server returns a JSON-RPC error" do
+      before do
+        stub_request(:post, "#{mcp_url}/")
+          .to_return(
+            status: 200,
+            headers: { "Content-Type" => "application/json" },
+            body: { jsonrpc: "2.0", id: 1, error: { code: -32_603, message: "Internal server error" } }.to_json
+          )
+      end
+
+      it "raises McpClient::Error instead of returning an empty tool list" do
+        expect { McpClient.list_tools }
+          .to raise_error(McpClient::Error, /tools\/list failed/)
+      end
+    end
   end
 
   describe ".call_tool" do
@@ -116,18 +132,42 @@ RSpec.describe McpClient do
       expect(result).to eq("Commodity: Live horses\nDuty rate: 0%")
     end
 
-    context "when the MCP server returns an error" do
+    context "when the MCP server returns a JSON-RPC error" do
       before do
         stub_request(:post, "#{mcp_url}/")
           .to_return(
             status: 200,
-            body: { jsonrpc: "2.0", id: 2, error: { code: -32602, message: "Invalid params" } }.to_json
+            body: { jsonrpc: "2.0", id: 2, error: { code: -32_602, message: "Invalid params" } }.to_json
           )
       end
 
       it "raises McpClient::Error" do
         expect { McpClient.call_tool("lookup_commodity", {}) }
           .to raise_error(McpClient::Error, "Invalid params")
+      end
+    end
+
+    context "when the tool result has isError set" do
+      before do
+        stub_token_request
+        stub_request(:post, "#{mcp_url}/")
+          .to_return(
+            status: 200,
+            headers: { "Content-Type" => "application/json" },
+            body: {
+              jsonrpc: "2.0",
+              id: 2,
+              result: {
+                isError: true,
+                content: [{ type: "text", text: "commodity_code not found" }]
+              }
+            }.to_json
+          )
+      end
+
+      it "raises McpClient::Error with the tool error message" do
+        expect { McpClient.call_tool("lookup_commodity", { "commodity_code" => "9999999999" }) }
+          .to raise_error(McpClient::Error, /lookup_commodity returned error.*commodity_code not found/m)
       end
     end
   end
