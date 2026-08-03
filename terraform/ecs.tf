@@ -40,40 +40,76 @@ resource "aws_ecs_task_definition" "ott_agent" {
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
 
-  container_definitions = jsonencode([{
-    name      = "ott-agent"
-    image     = local.ecr_image
-    essential = true
-    portMappings = [{ containerPort = 3000, hostPort = 3000, protocol = "tcp" }]
+  container_definitions = jsonencode([
+    {
+      name      = "ott-agent"
+      image     = local.ecr_image
+      essential = true
+      portMappings = [{ containerPort = 3000, hostPort = 3000, protocol = "tcp" }]
 
-    environment = [
-      { name = "RAILS_ENV",             value = "production" },
-      { name = "RAILS_LOG_TO_STDOUT",   value = "true" },
-      { name = "AWS_REGION",            value = "eu-west-2" },
-      { name = "MCP_URL",             value = "https://mcp.dev.trade-tariff.service.gov.uk" },
-      { name = "MCP_HUB_TOKEN_URL",  value = "https://auth.id.trade-tariff.service.gov.uk/oauth2/token" },
-      { name = "DB_HOST",               value = aws_db_instance.ott_agent.address },
-      { name = "DB_NAME",               value = aws_db_instance.ott_agent.db_name },
-      { name = "DB_USERNAME",           value = aws_db_instance.ott_agent.username },
-      { name = "REDIS_URL",             value = "redis://${aws_elasticache_cluster.ott_agent.cache_nodes[0].address}:6379/0" }
-    ]
+      environment = [
+        { name = "RAILS_ENV",           value = "production" },
+        { name = "RAILS_LOG_TO_STDOUT", value = "true" },
+        { name = "AWS_REGION",          value = "eu-west-2" },
+        { name = "MCP_URL",             value = "https://mcp.dev.trade-tariff.service.gov.uk" },
+        { name = "MCP_HUB_TOKEN_URL",   value = "https://auth.id.trade-tariff.service.gov.uk/oauth2/token" },
+        { name = "DB_HOST",             value = aws_db_instance.ott_agent.address },
+        { name = "DB_NAME",             value = aws_db_instance.ott_agent.db_name },
+        { name = "DB_USERNAME",         value = aws_db_instance.ott_agent.username },
+        { name = "REDIS_URL",           value = "redis://${aws_elasticache_cluster.ott_agent.cache_nodes[0].address}:6379/0" }
+      ]
 
-    secrets = [
-      { name = "SECRET_KEY_BASE",   valueFrom = data.aws_ssm_parameter.secret_key_base.arn },
-      { name = "MCP_CLIENT_ID",     valueFrom = data.aws_ssm_parameter.mcp_client_id.arn },
-      { name = "MCP_CLIENT_SECRET", valueFrom = data.aws_ssm_parameter.mcp_client_secret.arn },
-      { name = "DB_PASSWORD",       valueFrom = aws_ssm_parameter.db_password.arn }
-    ]
+      secrets = [
+        { name = "SECRET_KEY_BASE",   valueFrom = data.aws_ssm_parameter.secret_key_base.arn },
+        { name = "MCP_CLIENT_ID",     valueFrom = data.aws_ssm_parameter.mcp_client_id.arn },
+        { name = "MCP_CLIENT_SECRET", valueFrom = data.aws_ssm_parameter.mcp_client_secret.arn },
+        { name = "DB_PASSWORD",       valueFrom = aws_ssm_parameter.db_password.arn }
+      ]
 
-    logConfiguration = {
-      logDriver = "awslogs"
-      options = {
-        "awslogs-group"         = aws_cloudwatch_log_group.ott_agent.name
-        "awslogs-region"        = data.aws_region.current.name
-        "awslogs-stream-prefix" = "ott-agent"
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ott_agent.name
+          "awslogs-region"        = data.aws_region.current.name
+          "awslogs-stream-prefix" = "ott-agent"
+        }
+      }
+    },
+    {
+      name      = "sidekiq"
+      image     = local.ecr_image
+      essential = false
+      command   = ["bundle", "exec", "sidekiq"]
+
+      environment = [
+        { name = "RAILS_ENV",           value = "production" },
+        { name = "RAILS_LOG_TO_STDOUT", value = "true" },
+        { name = "AWS_REGION",          value = "eu-west-2" },
+        { name = "MCP_URL",             value = "https://mcp.dev.trade-tariff.service.gov.uk" },
+        { name = "MCP_HUB_TOKEN_URL",   value = "https://auth.id.trade-tariff.service.gov.uk/oauth2/token" },
+        { name = "DB_HOST",             value = aws_db_instance.ott_agent.address },
+        { name = "DB_NAME",             value = aws_db_instance.ott_agent.db_name },
+        { name = "DB_USERNAME",         value = aws_db_instance.ott_agent.username },
+        { name = "REDIS_URL",           value = "redis://${aws_elasticache_cluster.ott_agent.cache_nodes[0].address}:6379/0" }
+      ]
+
+      secrets = [
+        { name = "SECRET_KEY_BASE",   valueFrom = data.aws_ssm_parameter.secret_key_base.arn },
+        { name = "MCP_CLIENT_ID",     valueFrom = data.aws_ssm_parameter.mcp_client_id.arn },
+        { name = "MCP_CLIENT_SECRET", valueFrom = data.aws_ssm_parameter.mcp_client_secret.arn },
+        { name = "DB_PASSWORD",       valueFrom = aws_ssm_parameter.db_password.arn }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ott_agent.name
+          "awslogs-region"        = data.aws_region.current.name
+          "awslogs-stream-prefix" = "sidekiq"
+        }
       }
     }
-  }])
+  ])
 }
 
 resource "aws_ecs_service" "ott_agent" {
