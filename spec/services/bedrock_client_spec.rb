@@ -18,6 +18,7 @@ RSpec.describe BedrockClient do
     end
 
     before do
+      BedrockClient.instance_variable_set(:@client, nil)
       allow(Aws::BedrockRuntime::Client).to receive(:new).and_return(mock_client)
       allow(mock_client).to receive(:converse).and_return(mock_response)
     end

@@ -113,5 +113,38 @@ RSpec.describe AgentService do
         expect(message.output_tokens).to eq(50)
       end
     end
+
+    context "when MAX_TOOL_ITERATIONS is reached without end_turn" do
+      let(:tool_use_block) do
+        double(
+          text: nil,
+          tool_use: double(
+            tool_use_id: "tool_forever",
+            name: "lookup_commodity",
+            input: { "commodity_code" => "0101210000" }
+          )
+        )
+      end
+
+      let(:always_tool_use_response) do
+        double(
+          stop_reason: "tool_use",
+          output: double(message: double(content: [tool_use_block])),
+          usage: double(input_tokens: 10, output_tokens: 5)
+        )
+      end
+
+      before do
+        allow(BedrockClient).to receive(:converse).and_return(always_tool_use_response)
+        allow(McpClient).to receive(:call_tool).and_return("some result")
+      end
+
+      it "saves a non-empty assistant message with a truncation notice" do
+        message = AgentService.respond(conversation)
+        expect(message.role).to eq("assistant")
+        expect(message.content).not_to be_empty
+        expect(message.content).to include("maximum tool iterations")
+      end
+    end
   end
 end

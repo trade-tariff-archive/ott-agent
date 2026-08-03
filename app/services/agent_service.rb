@@ -39,6 +39,8 @@ class AgentService
     total_input_tokens  = 0
     total_output_tokens = 0
 
+    reached_end_turn = false
+
     MAX_TOOL_ITERATIONS.times do
       response = BedrockClient.converse(
         model_id:         model,
@@ -55,7 +57,10 @@ class AgentService
 
       messages << { role: "assistant", content: content_to_converse(assistant_content) }
 
-      break if response.stop_reason == "end_turn"
+      if response.stop_reason == "end_turn"
+        reached_end_turn = true
+        break
+      end
 
       tool_results = assistant_content
         .select { |block| block.tool_use }
@@ -72,7 +77,13 @@ class AgentService
       messages << { role: "user", content: tool_results }
     end
 
-    final_text = extract_text(messages.last[:content])
+    final_text = if reached_end_turn
+      extract_text(messages.last[:content])
+    else
+      last_assistant_content = messages.reverse.find { |m| m[:role] == "assistant" }&.dig(:content) || []
+      extracted = extract_text(last_assistant_content)
+      extracted.present? ? "#{extracted}\n\n[Response truncated: maximum tool iterations reached]" : "[Response truncated: maximum tool iterations reached without a final response]"
+    end
     latency    = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
 
     conversation.messages.create!(
