@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ott_agent
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ott_agent_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    command: bundle exec rails server -b 0.0.0.0 -p 3000
+    volumes:
+      - .:/app
+    ports:
+      - "3010:3000"
+    environment:
+      RAILS_ENV: development
+      DB_HOST: postgres
+      DB_USERNAME: ott_agent
+      DB_PASSWORD: password
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY_BASE: dev_secret_key_base_replace_in_prod
+      AWS_REGION: "${AWS_REGION:-eu-west-2}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      MCP_URL: "${MCP_URL}"
+      MCP_CLIENT_ID: "${MCP_CLIENT_ID}"
+      MCP_CLIENT_SECRET: "${MCP_CLIENT_SECRET}"
+      MCP_HUB_TOKEN_URL: "${MCP_HUB_TOKEN_URL:-https://auth.id.trade-tariff.service.gov.uk/oauth2/token}"
+    depends_on:
+      - postgres
+      - redis
+
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    volumes:
+      - .:/app
+    environment:
+      RAILS_ENV: development
+      DB_HOST: postgres
+      DB_USERNAME: ott_agent
+      DB_PASSWORD: password
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY_BASE: dev_secret_key_base_replace_in_prod
+      AWS_REGION: "${AWS_REGION:-eu-west-2}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      MCP_URL: "${MCP_URL}"
+      MCP_CLIENT_ID: "${MCP_CLIENT_ID}"
+      MCP_CLIENT_SECRET: "${MCP_CLIENT_SECRET}"
+      MCP_HUB_TOKEN_URL: "${MCP_HUB_TOKEN_URL:-https://auth.id.trade-tariff.service.gov.uk/oauth2/token}"
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  postgres_data:
