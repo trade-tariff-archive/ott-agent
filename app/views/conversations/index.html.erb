@@ -12,7 +12,7 @@
       <li>
         <%= link_to conversation.title, conversation_path(conversation), class: "govuk-link" %>
         <span class="govuk-hint govuk-!-margin-left-2">
-          <%= pluralize(conversation.messages.count, "message") %> ·
+          <%= pluralize(conversation.messages.size, "message") %> ·
           <%= number_with_delimiter(conversation.total_tokens) %> tokens total
         </span>
       </li>
