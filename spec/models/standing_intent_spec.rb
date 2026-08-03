@@ -4,6 +4,7 @@ RSpec.describe StandingIntent, type: :model do
   it { is_expected.to validate_presence_of(:visitor_id) }
   it { is_expected.to validate_presence_of(:commodity_code) }
   it { is_expected.to validate_presence_of(:description) }
+  it { is_expected.to validate_presence_of(:original_request) }
 
   describe "#needs_check?" do
     subject(:intent) { build(:standing_intent, last_checked_at: last_checked_at) }

@@ -1,9 +1,10 @@
 class StandingIntent < ApplicationRecord
   CHECK_INTERVAL = 6.hours
 
-  validates :visitor_id,    presence: true
-  validates :commodity_code, presence: true
-  validates :description,   presence: true
+  validates :visitor_id,        presence: true
+  validates :commodity_code,    presence: true
+  validates :description,       presence: true
+  validates :original_request,  presence: true
 
   scope :active,        -> { where(active: true) }
   scope :for_visitor,   ->(id) { where(visitor_id: id) }
