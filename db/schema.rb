@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_03_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_03_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -32,6 +32,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_03_000002) do
     t.string "role", null: false
     t.datetime "updated_at", null: false
     t.index ["conversation_id"], name: "index_messages_on_conversation_id"
+  end
+
+  create_table "standing_intents", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "commodity_code", null: false
+    t.datetime "created_at", null: false
+    t.string "description", null: false
+    t.datetime "last_checked_at"
+    t.string "last_result_digest"
+    t.string "original_request", null: false
+    t.datetime "updated_at", null: false
+    t.string "visitor_id", null: false
+    t.index ["visitor_id"], name: "index_standing_intents_on_visitor_id"
   end
 
   add_foreign_key "messages", "conversations"

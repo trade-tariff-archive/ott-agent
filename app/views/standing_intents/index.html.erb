@@ -1,0 +1,33 @@
+<h1 class="govuk-heading-l">Watchlist alerts</h1>
+
+<%= link_to "Add alert", new_standing_intent_path, class: "govuk-button" %>
+
+<% if @intents.any? %>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th class="govuk-table__header">Description</th>
+        <th class="govuk-table__header">Code</th>
+        <th class="govuk-table__header">Last checked</th>
+        <th class="govuk-table__header"></th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <% @intents.each do |intent| %>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><%= intent.description %></td>
+          <td class="govuk-table__cell"><%= intent.commodity_code %></td>
+          <td class="govuk-table__cell">
+            <%= intent.last_checked_at&.strftime("%d %b %Y %H:%M") || "never" %>
+          </td>
+          <td class="govuk-table__cell">
+            <%= button_to "Remove", standing_intent_path(intent), method: :delete,
+                class: "govuk-button govuk-button--warning govuk-button--small" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="govuk-body">No active alerts.</p>
+<% end %>

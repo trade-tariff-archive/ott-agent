@@ -1,0 +1,21 @@
+<h1 class="govuk-heading-l">Add a watchlist alert</h1>
+
+<p class="govuk-body">
+  Describe in plain English what you want to be alerted about.
+  For example: "Alert me if the duty rate on 8703.80 changes" or
+  "Let me know when quota 050001 utilisation exceeds 80%".
+</p>
+
+<% if flash[:alert] %>
+  <div class="govuk-error-summary">
+    <p class="govuk-body"><%= flash[:alert] %></p>
+  </div>
+<% end %>
+
+<%= form_with url: standing_intents_path do |f| %>
+  <div class="govuk-form-group">
+    <label class="govuk-label" for="request_text">What do you want to watch?</label>
+    <%= text_area_tag :request_text, nil, class: "govuk-textarea", rows: 3, id: "request_text" %>
+  </div>
+  <%= f.govuk_submit "Add alert" %>
+<% end %>
