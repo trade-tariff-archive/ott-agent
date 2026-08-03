@@ -1,6 +1,6 @@
 class ConversationsController < ApplicationController
   def index
-    @conversations = Conversation.for_visitor(visitor_id).order(created_at: :desc)
+    @conversations = Conversation.for_visitor(visitor_id).order(created_at: :desc).includes(:messages)
   end
 
   def show
