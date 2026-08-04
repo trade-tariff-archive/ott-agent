@@ -3,7 +3,7 @@ class IntentParserService
 
   PARSE_PROMPT = [
     {
-      text: <<~PROMPT.freeze
+      text: <<~PROMPT.freeze,
         Extract a standing tariff alert intent from the user's request.
 
         Return ONLY valid JSON with these exact keys:
@@ -20,19 +20,19 @@ class IntentParserService
         If the request has nothing to do with trade or tariffs, return {"error": "not_trade_related"}.
         No markdown fences, no explanation — raw JSON only.
       PROMPT
-    }
+    },
   ].freeze
 
   def self.parse(request_text)
     response = BedrockClient.converse(
-      model_id:         AgentService::SCHEDULED_MODEL,
-      system:           PARSE_PROMPT,
-      messages:         [{ role: "user", content: [{ text: request_text }] }],
-      inference_config: { max_tokens: 256 }
+      model_id: AgentService::SCHEDULED_MODEL,
+      system: PARSE_PROMPT,
+      messages: [{ role: "user", content: [{ text: request_text }] }],
+      inference_config: { max_tokens: 256 },
     )
 
     text = response.output.message.content
-      .find { |b| b.text }
+      .find(&:text)
       &.text
       .to_s.strip
       .gsub(/\A```(?:json)?\s*/, "")
@@ -43,12 +43,13 @@ class IntentParserService
     raise ParseError, "Not a trade-related request" if data["error"].present?
 
     stored_code = case data["type"]
-    when "quota"     then "QUOTA:#{data['identifier']}"
-    when "free_text" then "FREE:#{data['description']}"
-    else
-      raise ParseError, "Missing commodity code" unless data["identifier"].present?
-      data["identifier"]
-    end
+                  when "quota"     then "QUOTA:#{data['identifier']}"
+                  when "free_text" then "FREE:#{data['description']}"
+                  else
+                    raise ParseError, "Missing commodity code" unless data["identifier"].present?
+
+                    data["identifier"]
+                  end
 
     { commodity_code: stored_code, description: data["description"].to_s }
   rescue JSON::ParserError

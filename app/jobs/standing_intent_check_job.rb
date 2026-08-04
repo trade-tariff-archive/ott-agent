@@ -11,7 +11,7 @@ class StandingIntentCheckJob
     end
   end
 
-  private
+private
 
   def check_intent(intent)
     current_data = fetch_current_data(intent)
@@ -34,7 +34,7 @@ class StandingIntentCheckJob
     else
       McpClient.call_tool("commodity_history_diff", {
         "commodity_code" => intent.commodity_code,
-        "from_date"      => DIFF_WINDOW_DAYS.days.ago.to_date.to_s
+        "from_date" => DIFF_WINDOW_DAYS.days.ago.to_date.to_s,
       })
     end
   end
@@ -42,7 +42,7 @@ class StandingIntentCheckJob
   def fetch_free_text_status(intent)
     conversation = Conversation.create!(
       visitor_id: intent.visitor_id,
-      title:      "Status check (internal)"
+      title: "Status check (internal)",
     )
     prompt = <<~PROMPT
       Using the trade tariff tools, produce a concise factual status summary for the
@@ -60,14 +60,16 @@ class StandingIntentCheckJob
   def summarise_change(intent, current_data)
     conversation = Conversation.create!(
       visitor_id: intent.visitor_id,
-      title:      "Alert: #{intent.description}"
+      title: "Alert: #{intent.description}",
     )
 
-    subject = case
-    when intent.commodity_code.start_with?("QUOTA:") then "quota #{intent.commodity_code.delete_prefix('QUOTA:')}"
-    when intent.commodity_code.start_with?("FREE:")  then intent.description
-    else "commodity #{intent.commodity_code}"
-    end
+    subject = if intent.commodity_code.start_with?("QUOTA:")
+                "quota #{intent.commodity_code.delete_prefix('QUOTA:')}"
+              elsif intent.commodity_code.start_with?("FREE:")
+                intent.description
+              else
+                "commodity #{intent.commodity_code}"
+              end
 
     prompt = <<~PROMPT
       A standing tariff alert has triggered for: #{intent.description}

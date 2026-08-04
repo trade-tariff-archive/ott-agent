@@ -9,7 +9,8 @@ class McpClient
 
   def self.list_tools
     response = post({ method: "tools/list", params: {}, id: 1 })
-    raise Error, "tools/list failed: #{response["error"]}" if response["error"]
+    raise Error, "tools/list failed: #{response['error']}" if response["error"]
+
     (response.dig("result", "tools") || []).map { |tool| to_bedrock_tool(tool) }
   end
 
@@ -17,7 +18,7 @@ class McpClient
     response = post({
       method: "tools/call",
       params: { name: name, arguments: arguments },
-      id: 2
+      id: 2,
     })
 
     raise Error, response.dig("error", "message") if response["error"]
@@ -75,10 +76,10 @@ class McpClient
     end
 
     response = conn.post("", {
-      grant_type:    "client_credentials",
-      client_id:     client_id,
+      grant_type: "client_credentials",
+      client_id: client_id,
       client_secret: client_secret,
-      scope:         "tariff/read"
+      scope: "tariff/read",
     })
 
     token = response.body["access_token"]
@@ -97,7 +98,7 @@ class McpClient
     padded  = segments[1].ljust((segments[1].length + 3) & ~3, "=")
     payload = JSON.parse(Base64.urlsafe_decode64(padded))
     exp     = payload["exp"].to_i
-    exp > 0 ? Time.at(exp) - TOKEN_EXPIRY_BUFFER : Time.current + 50.minutes
+    exp.positive? ? Time.at(exp) - TOKEN_EXPIRY_BUFFER : Time.current + 50.minutes
   rescue JSON::ParserError, ArgumentError
     Time.current + 50.minutes
   end
@@ -107,10 +108,10 @@ class McpClient
     schema = tool["inputSchema"] || tool["input_schema"] || {}
     {
       tool_spec: {
-        name:         tool["name"],
-        description:  tool["description"],
-        input_schema: { json: deep_symbolize(schema) }
-      }
+        name: tool["name"],
+        description: tool["description"],
+        input_schema: { json: deep_symbolize(schema) },
+      },
     }
   end
   private_class_method :to_bedrock_tool

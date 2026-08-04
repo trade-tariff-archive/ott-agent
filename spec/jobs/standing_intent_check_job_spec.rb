@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe StandingIntentCheckJob, type: :job do
   let!(:intent) do
     create(:standing_intent, commodity_code: "0101210000",
-           last_checked_at: nil, last_result_digest: nil)
+                             last_checked_at: nil, last_result_digest: nil)
   end
 
   let(:diff_result)         { "No changes found for 0101210000 in the last 30 days." }
@@ -13,7 +13,7 @@ RSpec.describe StandingIntentCheckJob, type: :job do
     allow(McpClient).to receive(:call_tool)
       .with("commodity_history_diff", {
         "commodity_code" => "0101210000",
-        "from_date"      => StandingIntentCheckJob::DIFF_WINDOW_DAYS.days.ago.to_date.to_s
+        "from_date" => StandingIntentCheckJob::DIFF_WINDOW_DAYS.days.ago.to_date.to_s,
       })
       .and_return(diff_result)
   end
@@ -48,7 +48,7 @@ RSpec.describe StandingIntentCheckJob, type: :job do
         dummy_conv = create(:conversation, visitor_id: intent.visitor_id, title: "dummy")
         allow(Conversation).to receive(:create!).and_return(dummy_conv)
         allow(AgentService).to receive(:respond).and_return(
-          build(:message, role: "assistant", content: "Duty rate changed.")
+          build(:message, role: "assistant", content: "Duty rate changed."),
         )
 
         described_class.new.perform

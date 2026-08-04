@@ -4,19 +4,19 @@ source "https://rubygems.org"
 
 ruby file: ".ruby-version"
 
-gem "rails", "~> 8.1"
-gem "pg", "~> 1.5"
-gem "puma", ">= 5.0"
-gem "propshaft"
 gem "importmap-rails"
+gem "pg", "~> 1.5"
+gem "propshaft"
+gem "puma", ">= 5.0"
+gem "rails", "~> 8.1"
 
 gem "faraday", "~> 2.12"
 gem "faraday-retry"
 
 gem "aws-sdk-bedrockruntime"
 
-gem "turbo-rails"
 gem "redis", "~> 5.0"
+gem "turbo-rails"
 
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
@@ -24,17 +24,18 @@ gem "govuk_design_system_formbuilder"
 gem "sidekiq", "~> 7.3"
 gem "sidekiq-cron", "~> 2.0"
 
-gem "redcarpet", "~> 3.6"
 gem "bootsnap", require: false
+gem "redcarpet", "~> 3.6"
 
 group :development, :test do
+  gem "brakeman", require: false
+  gem "bundler-audit", require: false
   gem "dotenv-rails"
-  gem "rspec-rails", "~> 7.0"
   gem "factory_bot_rails"
+  gem "rspec-rails", "~> 7.0"
+  gem "rubocop-govuk", require: false
   gem "shoulda-matchers", "~> 6.0"
   gem "webmock"
-  gem "brakeman", require: false
-  gem "rubocop-govuk", require: false
 end
 
 group :production do

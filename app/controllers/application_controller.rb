@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :visitor_id
 
-  private
+private
 
   def visitor_id
     session[:visitor_id]

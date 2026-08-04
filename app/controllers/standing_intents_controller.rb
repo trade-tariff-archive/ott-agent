@@ -15,10 +15,10 @@ class StandingIntentsController < ApplicationController
     parsed = IntentParserService.parse(params[:request_text])
 
     @intent = StandingIntent.new(
-      visitor_id:       visitor_id,
-      commodity_code:   parsed[:commodity_code],
-      description:      parsed[:description],
-      original_request: params[:request_text]
+      visitor_id: visitor_id,
+      commodity_code: parsed[:commodity_code],
+      description: parsed[:description],
+      original_request: params[:request_text],
     )
 
     if @intent.save

@@ -9,5 +9,5 @@ Rails.application.routes.draw do
 
   root to: redirect("/conversations")
 
-  get "healthcheckz", to: proc { [200, {}, ["OK"]] }
+  get "healthcheckz", to: proc { [200, {}, %w[OK]] }
 end

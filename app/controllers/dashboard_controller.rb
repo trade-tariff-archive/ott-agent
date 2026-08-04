@@ -28,7 +28,7 @@ class DashboardController < ApplicationController
       .count
   end
 
-  private
+private
 
   def estimated_cost
     alert_conv_ids = Conversation.where("title LIKE 'Alert:%'").pluck(:id)
@@ -45,7 +45,7 @@ class DashboardController < ApplicationController
   def token_cost(scope, input_price, output_price)
     totals = scope.pick(
       Arel.sql("COALESCE(SUM(input_tokens), 0)"),
-      Arel.sql("COALESCE(SUM(output_tokens), 0)")
+      Arel.sql("COALESCE(SUM(output_tokens), 0)"),
     )
     input_tokens, output_tokens = totals
     (input_tokens * input_price + output_tokens * output_price) / 1_000_000.0
@@ -57,7 +57,7 @@ class DashboardController < ApplicationController
     scope.pick(
       Arel.sql("ROUND(AVG(latency_seconds)::numeric, 1)"),
       Arel.sql("ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY latency_seconds)::numeric, 1)"),
-      Arel.sql("ROUND(percentile_cont(0.95) WITHIN GROUP (ORDER BY latency_seconds)::numeric, 1)")
+      Arel.sql("ROUND(percentile_cont(0.95) WITHIN GROUP (ORDER BY latency_seconds)::numeric, 1)"),
     )
   end
 end

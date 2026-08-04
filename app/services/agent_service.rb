@@ -1,11 +1,11 @@
 class AgentService
-  INTERACTIVE_MODEL   = "anthropic.claude-sonnet-4-6"
-  SCHEDULED_MODEL     = "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
+  INTERACTIVE_MODEL   = "anthropic.claude-sonnet-4-6".freeze
+  SCHEDULED_MODEL     = "eu.anthropic.claude-haiku-4-5-20251001-v1:0".freeze
   MAX_TOOL_ITERATIONS = 10
 
   SYSTEM_PROMPT = [
     {
-      text: <<~PROMPT.freeze
+      text: <<~PROMPT.freeze,
         You are a UK trade tariff assistant. You help users find commodity codes, understand
         import and export duties, VAT, quotas, rules of origin, and related tariff information
         for goods traded with the UK and Northern Ireland.
@@ -21,10 +21,17 @@ class AgentService
         them to rephrase as a trade or tariff question. Do not answer off-topic questions
         even if they seem harmless.
 
+        Tone and style:
+        - Write in plain English following GOV.UK content design principles.
+        - Be direct, factual and impartial. Avoid jargon where a simpler word exists.
+        - Do not use emoji under any circumstances.
+        - Use active voice where possible.
+        - Address the user as "you".
+
         Be concise and accurate. Where relevant, cite the commodity code and duty rates you
         found. If a code is ambiguous, use classification_search first.
       PROMPT
-    }
+    },
   ].freeze
 
   # Creates the user message then delegates to respond.
@@ -49,11 +56,11 @@ class AgentService
 
     MAX_TOOL_ITERATIONS.times do
       response = BedrockClient.converse(
-        model_id:         model,
-        system:           SYSTEM_PROMPT,
-        messages:         messages,
-        tool_config:      { tools: tools },
-        inference_config: { max_tokens: 4096 }
+        model_id: model,
+        system: SYSTEM_PROMPT,
+        messages: messages,
+        tool_config: { tools: tools },
+        inference_config: { max_tokens: 4096 },
       )
 
       total_input_tokens  += response.usage.input_tokens.to_i
@@ -69,14 +76,14 @@ class AgentService
       end
 
       tool_results = assistant_content
-        .select { |block| block.tool_use }
+        .select(&:tool_use)
         .map do |block|
           result = McpClient.call_tool(block.tool_use.name, block.tool_use.input)
           {
             tool_result: {
               tool_use_id: block.tool_use.tool_use_id,
-              content:     [{ text: result }]
-            }
+              content: [{ text: result }],
+            },
           }
         end
 
@@ -84,28 +91,28 @@ class AgentService
     end
 
     final_text = if reached_end_turn
-      extract_text(messages.last[:content])
-    else
-      last_assistant_content = messages.reverse.find { |m| m[:role] == "assistant" }&.dig(:content) || []
-      extracted = extract_text(last_assistant_content)
-      extracted.present? ? "#{extracted}\n\n[Response truncated: maximum tool iterations reached]" : "[Response truncated: maximum tool iterations reached without a final response]"
-    end
-    latency    = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
+                   extract_text(messages.last[:content])
+                 else
+                   last_assistant_content = messages.reverse.find { |m| m[:role] == "assistant" }&.dig(:content) || []
+                   extracted = extract_text(last_assistant_content)
+                   extracted.present? ? "#{extracted}\n\n[Response truncated: maximum tool iterations reached]" : "[Response truncated: maximum tool iterations reached without a final response]"
+                 end
+    latency = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
 
     conversation.messages.create!(
-      role:            "assistant",
-      content:         final_text,
-      input_tokens:    total_input_tokens,
-      output_tokens:   total_output_tokens,
-      latency_seconds: latency
+      role: "assistant",
+      content: final_text,
+      input_tokens: total_input_tokens,
+      output_tokens: total_output_tokens,
+      latency_seconds: latency,
     )
   end
 
   def self.build_messages(conversation)
     conversation.messages.order(:created_at).map do |msg|
       {
-        role:    msg.role,
-        content: [{ text: msg.content }]
+        role: msg.role,
+        content: [{ text: msg.content }],
       }
     end
   end
@@ -117,9 +124,9 @@ class AgentService
         {
           tool_use: {
             tool_use_id: block.tool_use.tool_use_id,
-            name:        block.tool_use.name,
-            input:       block.tool_use.input
-          }
+            name: block.tool_use.name,
+            input: block.tool_use.input,
+          },
         }
       else
         { text: block.text.to_s }

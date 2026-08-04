@@ -8,7 +8,7 @@ class StandingIntent < ApplicationRecord
 
   scope :active,        -> { where(active: true) }
   scope :for_visitor,   ->(id) { where(visitor_id: id) }
-  scope :due_for_check, -> {
+  scope :due_for_check, lambda {
     active.where("last_checked_at IS NULL OR last_checked_at < ?", CHECK_INTERVAL.ago)
   }
 

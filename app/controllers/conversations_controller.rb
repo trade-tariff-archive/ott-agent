@@ -13,7 +13,7 @@ class ConversationsController < ApplicationController
 
     @conversation = Conversation.new(
       visitor_id: visitor_id,
-      title:      first_message.presence || "New conversation"
+      title: first_message.presence || "New conversation",
     )
 
     if @conversation.save

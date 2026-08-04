@@ -13,10 +13,10 @@ RSpec.describe AgentService do
           json: {
             type: "object",
             properties: { commodity_code: { type: "string" } },
-            required: ["commodity_code"]
-          }
-        }
-      }
+            required: %w[commodity_code],
+          },
+        },
+      },
     }]
   end
 
@@ -25,10 +25,10 @@ RSpec.describe AgentService do
       stop_reason: "end_turn",
       output: double(
         message: double(
-          content: [double(text: "The duty rate is 0%.", tool_use: nil)]
-        )
+          content: [double(text: "The duty rate is 0%.", tool_use: nil)],
+        ),
       ),
-      usage: double(input_tokens: 150, output_tokens: 20)
+      usage: double(input_tokens: 150, output_tokens: 20),
     )
   end
 
@@ -53,7 +53,7 @@ RSpec.describe AgentService do
   describe ".respond" do
     before do
       create(:message, conversation: conversation, role: "user",
-             content: "What is the duty on 0101210000?")
+                       content: "What is the duty on 0101210000?")
     end
 
     context "when the model returns end_turn immediately (no tool calls)" do
@@ -80,8 +80,8 @@ RSpec.describe AgentService do
           tool_use: double(
             tool_use_id: "tool_1",
             name: "lookup_commodity",
-            input: { "commodity_code" => "0101210000" }
-          )
+            input: { "commodity_code" => "0101210000" },
+          ),
         )
       end
 
@@ -89,7 +89,7 @@ RSpec.describe AgentService do
         double(
           stop_reason: "tool_use",
           output: double(message: double(content: [tool_use_block])),
-          usage: double(input_tokens: 200, output_tokens: 30)
+          usage: double(input_tokens: 200, output_tokens: 30),
         )
       end
 
@@ -121,8 +121,8 @@ RSpec.describe AgentService do
           tool_use: double(
             tool_use_id: "tool_forever",
             name: "lookup_commodity",
-            input: { "commodity_code" => "0101210000" }
-          )
+            input: { "commodity_code" => "0101210000" },
+          ),
         )
       end
 
@@ -130,7 +130,7 @@ RSpec.describe AgentService do
         double(
           stop_reason: "tool_use",
           output: double(message: double(content: [tool_use_block])),
-          usage: double(input_tokens: 10, output_tokens: 5)
+          usage: double(input_tokens: 10, output_tokens: 5),
         )
       end
 

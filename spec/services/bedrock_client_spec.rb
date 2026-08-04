@@ -9,11 +9,11 @@ RSpec.describe BedrockClient do
         output: double(
           message: double(
             role: "assistant",
-            content: [double(text: "Hi there!", tool_use: nil)]
-          )
+            content: [double(text: "Hi there!", tool_use: nil)],
+          ),
         ),
         stop_reason: "end_turn",
-        usage: double(input_tokens: 10, output_tokens: 5)
+        usage: double(input_tokens: 10, output_tokens: 5),
       )
     end
 
@@ -27,7 +27,7 @@ RSpec.describe BedrockClient do
       result = BedrockClient.converse(
         model_id: "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
         messages: [{ role: "user", content: [{ text: "Hello" }] }],
-        inference_config: { max_tokens: 256 }
+        inference_config: { max_tokens: 256 },
       )
 
       expect(result.stop_reason).to eq("end_turn")

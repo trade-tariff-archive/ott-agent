@@ -4,9 +4,9 @@ Sidekiq.configure_server do |config|
   config.on(:startup) do
     Sidekiq::Cron::Job.load_from_hash(
       "standing_intent_check" => {
-        "cron"  => "0 */6 * * *",
-        "class" => "StandingIntentCheckJob"
-      }
+        "cron" => "0 */6 * * *",
+        "class" => "StandingIntentCheckJob",
+      },
     )
   end
 end

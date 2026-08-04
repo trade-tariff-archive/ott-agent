@@ -12,7 +12,7 @@ class AgentResponseJob
       content: "Sorry — I couldn't complete that request. Please try again.",
       input_tokens: 0,
       output_tokens: 0,
-      latency_seconds: 0
+      latency_seconds: 0,
     )
   end
 end

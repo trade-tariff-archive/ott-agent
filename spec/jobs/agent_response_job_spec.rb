@@ -5,13 +5,13 @@ RSpec.describe AgentResponseJob, type: :job do
 
   before do
     create(:message, conversation: conversation, role: "user",
-           content: "What is the duty on 0101210000?")
+                     content: "What is the duty on 0101210000?")
   end
 
   describe "#perform" do
     it "calls AgentService.respond with the conversation" do
       allow(AgentService).to receive(:respond).and_return(
-        build(:message, role: "assistant", content: "0%")
+        build(:message, role: "assistant", content: "0%"),
       )
 
       described_class.new.perform(conversation.id)

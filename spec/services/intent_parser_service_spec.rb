@@ -10,12 +10,12 @@ RSpec.describe IntentParserService do
             content: [
               double(
                 text: '{"commodity_code":"0101210000","description":"Monitor duty rate changes on live horses"}',
-                tool_use: nil
-              )
-            ]
-          )
+                tool_use: nil,
+              ),
+            ],
+          ),
         ),
-        usage: double(input_tokens: 100, output_tokens: 30)
+        usage: double(input_tokens: 100, output_tokens: 30),
       )
     end
 
@@ -37,10 +37,10 @@ RSpec.describe IntentParserService do
           stop_reason: "end_turn",
           output: double(
             message: double(
-              content: [double(text: "I cannot identify a commodity code.", tool_use: nil)]
-            )
+              content: [double(text: "I cannot identify a commodity code.", tool_use: nil)],
+            ),
           ),
-          usage: double(input_tokens: 50, output_tokens: 10)
+          usage: double(input_tokens: 50, output_tokens: 10),
         )
       end
 

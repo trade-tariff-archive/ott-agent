@@ -1,7 +1,7 @@
 class CreateStandingIntents < ActiveRecord::Migration[8.1]
   def change
     create_table :standing_intents do |t|
-      t.string   :visitor_id,          null: false
+      t.string   :visitor_id, null: false
       t.string   :commodity_code,       null: false
       t.string   :description,          null: false
       t.string   :original_request,     null: false

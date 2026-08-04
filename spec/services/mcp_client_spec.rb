@@ -8,11 +8,11 @@ RSpec.describe McpClient do
 
   before do
     stub_const("ENV", ENV.to_h.merge(
-      "MCP_URL"           => mcp_url,
-      "MCP_CLIENT_ID"     => "test-client-id",
-      "MCP_CLIENT_SECRET" => "test-client-secret",
-      "MCP_HUB_TOKEN_URL" => hub_token_url
-    ))
+                        "MCP_URL" => mcp_url,
+                        "MCP_CLIENT_ID" => "test-client-id",
+                        "MCP_CLIENT_SECRET" => "test-client-secret",
+                        "MCP_HUB_TOKEN_URL" => hub_token_url,
+                      ))
     McpClient.instance_variable_set(:@cached_token, nil)
     McpClient.instance_variable_set(:@token_expires_at, nil)
   end
@@ -28,7 +28,7 @@ RSpec.describe McpClient do
       .to_return(
         status: 200,
         body: { access_token: token }.to_json,
-        headers: { "Content-Type" => "application/json" }
+        headers: { "Content-Type" => "application/json" },
       )
   end
 
@@ -38,7 +38,7 @@ RSpec.describe McpClient do
       stub_request(:post, "#{mcp_url}/")
         .with(
           headers: { "Authorization" => "Bearer #{jwt_token}" },
-          body: hash_including("method" => "tools/list")
+          body: hash_including("method" => "tools/list"),
         )
         .to_return(
           status: 200,
@@ -54,12 +54,12 @@ RSpec.describe McpClient do
                   inputSchema: {
                     type: "object",
                     properties: { commodity_code: { type: "string" } },
-                    required: ["commodity_code"]
-                  }
-                }
-              ]
-            }
-          }.to_json
+                    required: %w[commodity_code],
+                  },
+                },
+              ],
+            },
+          }.to_json,
         )
     end
 
@@ -87,7 +87,7 @@ RSpec.describe McpClient do
       stub_request(:post, "#{mcp_url}/").to_return(
         status: 200,
         body: { jsonrpc: "2.0", id: 1, result: { tools: [] } }.to_json,
-        headers: { "Content-Type" => "application/json" }
+        headers: { "Content-Type" => "application/json" },
       )
 
       McpClient.list_tools
@@ -100,7 +100,7 @@ RSpec.describe McpClient do
           .to_return(
             status: 200,
             headers: { "Content-Type" => "application/json" },
-            body: { jsonrpc: "2.0", id: 1, error: { code: -32_603, message: "Internal server error" } }.to_json
+            body: { jsonrpc: "2.0", id: 1, error: { code: -32_603, message: "Internal server error" } }.to_json,
           )
       end
 
@@ -122,8 +122,8 @@ RSpec.describe McpClient do
           body: {
             jsonrpc: "2.0",
             id: 2,
-            result: { content: [{ type: "text", text: "Commodity: Live horses\nDuty rate: 0%" }] }
-          }.to_json
+            result: { content: [{ type: "text", text: "Commodity: Live horses\nDuty rate: 0%" }] },
+          }.to_json,
         )
     end
 
@@ -137,7 +137,7 @@ RSpec.describe McpClient do
         stub_request(:post, "#{mcp_url}/")
           .to_return(
             status: 200,
-            body: { jsonrpc: "2.0", id: 2, error: { code: -32_602, message: "Invalid params" } }.to_json
+            body: { jsonrpc: "2.0", id: 2, error: { code: -32_602, message: "Invalid params" } }.to_json,
           )
       end
 
@@ -159,9 +159,9 @@ RSpec.describe McpClient do
               id: 2,
               result: {
                 isError: true,
-                content: [{ type: "text", text: "commodity_code not found" }]
-              }
-            }.to_json
+                content: [{ type: "text", text: "commodity_code not found" }],
+              },
+            }.to_json,
           )
       end
 
