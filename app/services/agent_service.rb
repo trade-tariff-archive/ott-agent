@@ -1,6 +1,6 @@
 class AgentService
   INTERACTIVE_MODEL   = "anthropic.claude-sonnet-4-6"
-  SCHEDULED_MODEL     = "anthropic.claude-haiku-4-5-20251001-v1:0"
+  SCHEDULED_MODEL     = "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
   MAX_TOOL_ITERATIONS = 10
 
   SYSTEM_PROMPT = [
