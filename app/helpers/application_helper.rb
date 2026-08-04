@@ -1,3 +1,25 @@
 module ApplicationHelper
   include GOVUKDesignSystemFormBuilder::BuilderHelper
+
+  MARKDOWN_RENDERER = Redcarpet::Render::HTML.new(hard_wrap: true, safe_links_only: true)
+  MARKDOWN = Redcarpet::Markdown.new(MARKDOWN_RENDERER, tables: true, fenced_code_blocks: true, autolink: true, strikethrough: true)
+
+  MARKDOWN_ALLOWED_TAGS = %w[p br strong em code pre h1 h2 h3 h4 ul ol li blockquote table thead tbody tr th td a hr].freeze
+
+  COMMODITY_CODE_PATTERN = /\b(\d{10})\b/.freeze
+  TARIFF_BASE_URL = "https://www.trade-tariff.service.gov.uk/commodities/".freeze
+
+  def render_markdown(text)
+    html = MARKDOWN.render(text.to_s)
+    html = link_commodity_codes(html)
+    sanitize(html, tags: MARKDOWN_ALLOWED_TAGS, attributes: %w[href class target rel])
+  end
+
+  private
+
+  def link_commodity_codes(html)
+    html.gsub(COMMODITY_CODE_PATTERN) do |code|
+      %(<a href="#{TARIFF_BASE_URL}#{code}" class="govuk-link" target="_blank" rel="noopener noreferrer">#{code}</a>)
+    end
+  end
 end

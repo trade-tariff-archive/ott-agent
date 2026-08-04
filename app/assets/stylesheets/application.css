@@ -1,10 +1,81 @@
 /*
- * This is a manifest file that'll be compiled into application.css.
- *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
+ * Message content — styles for markdown-rendered assistant responses.
+ * Targets .app-message-content which wraps Redcarpet HTML output.
  */
+
+.app-message-content p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.app-message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.app-message-content h1,
+.app-message-content h2,
+.app-message-content h3,
+.app-message-content h4 {
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.app-message-content ul,
+.app-message-content ol {
+  margin-bottom: 15px;
+  padding-left: 25px;
+}
+
+.app-message-content li {
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+.app-message-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.app-message-content th,
+.app-message-content td {
+  border: 1px solid #b1b4b6;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.app-message-content th {
+  background-color: #f3f2f1;
+  font-weight: 700;
+}
+
+.app-message-content tr:nth-child(even) {
+  background-color: #f8f8f8;
+}
+
+.app-message-content code {
+  background-color: #f3f2f1;
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.app-message-content pre {
+  background-color: #f3f2f1;
+  padding: 15px;
+  overflow-x: auto;
+  margin-bottom: 15px;
+}
+
+.app-message-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.app-message-content strong {
+  font-weight: 700;
+}

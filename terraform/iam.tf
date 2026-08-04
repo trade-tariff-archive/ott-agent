@@ -53,10 +53,17 @@ resource "aws_iam_role_policy" "bedrock" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"]
-      Resource = ["arn:aws:bedrock:*:*:inference-profile/*", "arn:aws:bedrock:*::foundation-model/*"]
-    }]
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"]
+        Resource = ["arn:aws:bedrock:*:*:inference-profile/*", "arn:aws:bedrock:*::foundation-model/*"]
+      },
+      {
+        Effect = "Allow"
+        Action = ["aws-marketplace:ViewSubscriptions", "aws-marketplace:Subscribe"]
+        Resource = ["*"]
+      }
+    ]
   })
 }

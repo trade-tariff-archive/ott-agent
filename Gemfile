@@ -24,6 +24,7 @@ gem "govuk_design_system_formbuilder"
 gem "sidekiq", "~> 7.3"
 gem "sidekiq-cron", "~> 2.0"
 
+gem "redcarpet", "~> 3.6"
 gem "bootsnap", require: false
 
 group :development, :test do

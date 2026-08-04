@@ -12,7 +12,7 @@
           · <%= message.latency_seconds.round(1) %>s
         <% end %>
       </p>
-      <p class="govuk-body"><%= message.content %></p>
+      <div class="app-message-content"><%= render_markdown(message.content) %></div>
     </div>
   <% end %>
 
@@ -22,6 +22,8 @@
       <p class="govuk-body govuk-hint">Thinking…</p>
     </div>
   <% end %>
+
+  <div id="messages-bottom"></div>
 </div>
 
 <%= form_with url: conversation_messages_path(@conversation), method: :post do |f| %>

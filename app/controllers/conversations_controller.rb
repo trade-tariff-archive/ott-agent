@@ -9,12 +9,18 @@ class ConversationsController < ApplicationController
   end
 
   def create
+    first_message = params[:title].to_s.strip
+
     @conversation = Conversation.new(
       visitor_id: visitor_id,
-      title:      params[:title].presence || "New conversation"
+      title:      first_message.presence || "New conversation"
     )
 
     if @conversation.save
+      if first_message.present?
+        @conversation.messages.create!(role: "user", content: first_message)
+        AgentResponseJob.perform_async(@conversation.id)
+      end
       redirect_to @conversation
     else
       redirect_to conversations_path, alert: "Could not create conversation."

@@ -1,9 +1,9 @@
 <h1 class="govuk-heading-l">Your conversations</h1>
 
 <%= form_with url: conversations_path, method: :post do |f| %>
-  <%= f.govuk_text_field :title, label: { text: "Start a new conversation" },
-      hint: { text: "Give it a title, or leave blank" } %>
-  <%= f.govuk_submit "Start conversation" %>
+  <%= f.govuk_text_field :title, label: { text: "What do you need help with?" },
+      hint: { text: "Ask a trade or tariff question to start a conversation" } %>
+  <%= f.govuk_submit "Ask" %>
 <% end %>
 
 <% if @conversations.any? %>
