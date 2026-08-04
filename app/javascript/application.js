@@ -1,9 +1,9 @@
 import "@hotwired/turbo-rails"
 
 function scrollToBottom() {
-  const el = document.getElementById("messages-bottom")
-  if (el) el.scrollIntoView({ behavior: "smooth" })
+  if (!document.getElementById("messages-bottom")) return
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
 }
 
+document.addEventListener("turbo:load", scrollToBottom)
 document.addEventListener("turbo:render", scrollToBottom)
-document.addEventListener("DOMContentLoaded", scrollToBottom)
