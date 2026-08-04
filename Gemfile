@@ -25,7 +25,6 @@ gem "sidekiq", "~> 7.3"
 gem "sidekiq-cron", "~> 2.0"
 
 gem "bootsnap", require: false
-gem "newrelic_rpm"
 
 group :development, :test do
   gem "dotenv-rails"
