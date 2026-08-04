@@ -19,7 +19,15 @@
     <div class="app-stat-card__value"><%= number_with_delimiter(@total_intents) %></div>
     <div class="app-stat-card__label">Active watchlist alerts</div>
   </div>
+  <div class="app-stat-card">
+    <div class="app-stat-card__value">$<%= number_with_precision(@estimated_cost_usd, precision: 4) %></div>
+    <div class="app-stat-card__label">Estimated cost (USD)</div>
+  </div>
 </div>
+<p class="govuk-body-s govuk-hint govuk-!-margin-top-1 govuk-!-margin-bottom-6">
+  Cost estimate based on AWS Bedrock on-demand pricing: Sonnet 4.6 $3/$15 per MTok in/out,
+  Haiku 4.5 $1/$5 per MTok in/out. Alert conversations attributed to Haiku; all others to Sonnet.
+</p>
 
 <h2 class="govuk-heading-m">Latency (assistant responses)</h2>
 
@@ -78,7 +86,7 @@
   <p class="govuk-body govuk-hint govuk-!-margin-bottom-6">No conversations in the last 7 days.</p>
 <% end %>
 
-<h2 class="govuk-heading-m">Recent conversations</h2>
+<h2 class="govuk-heading-m">All conversations</h2>
 
 <% if @recent_conversations.any? %>
   <table class="govuk-table">

@@ -1,4 +1,9 @@
 class DashboardController < ApplicationController
+  SONNET_INPUT_PRICE_PER_M  = 3.0
+  SONNET_OUTPUT_PRICE_PER_M = 15.0
+  HAIKU_INPUT_PRICE_PER_M   = 1.0
+  HAIKU_OUTPUT_PRICE_PER_M  = 5.0
+
   def index
     assistant_messages = Message.where(role: "assistant")
     timed_messages     = assistant_messages.where("latency_seconds > 0")
@@ -13,7 +18,8 @@ class DashboardController < ApplicationController
     @avg_input_tokens  = assistant_messages.average(:input_tokens)&.round(0).to_i
     @avg_output_tokens = assistant_messages.average(:output_tokens)&.round(0).to_i
 
-    @recent_conversations = Conversation.order(created_at: :desc).limit(10).includes(:messages)
+    @estimated_cost_usd = estimated_cost
+    @recent_conversations = Conversation.order(created_at: :desc).includes(:messages)
 
     @daily_counts = Conversation
       .where(created_at: 7.days.ago..)
@@ -23,6 +29,27 @@ class DashboardController < ApplicationController
   end
 
   private
+
+  def estimated_cost
+    alert_conv_ids = Conversation.where("title LIKE 'Alert:%'").pluck(:id)
+
+    haiku_msgs  = Message.where(role: "assistant", conversation_id: alert_conv_ids)
+    sonnet_msgs = Message.where(role: "assistant").where.not(conversation_id: alert_conv_ids)
+
+    haiku_cost  = token_cost(haiku_msgs,  HAIKU_INPUT_PRICE_PER_M,  HAIKU_OUTPUT_PRICE_PER_M)
+    sonnet_cost = token_cost(sonnet_msgs, SONNET_INPUT_PRICE_PER_M, SONNET_OUTPUT_PRICE_PER_M)
+
+    haiku_cost + sonnet_cost
+  end
+
+  def token_cost(scope, input_price, output_price)
+    totals = scope.pick(
+      Arel.sql("COALESCE(SUM(input_tokens), 0)"),
+      Arel.sql("COALESCE(SUM(output_tokens), 0)")
+    )
+    input_tokens, output_tokens = totals
+    (input_tokens * input_price + output_tokens * output_price) / 1_000_000.0
+  end
 
   def latency_percentiles(scope)
     return [nil, nil, nil] if scope.none?

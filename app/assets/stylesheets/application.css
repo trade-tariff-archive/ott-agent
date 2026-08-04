@@ -1,4 +1,13 @@
 /*
+ * Base font — GDS Transport (the GOV.UK font) is served from the GOV.UK CDN
+ * and is not available when loading govuk-frontend CSS from unpkg. Override
+ * to a system sans-serif so the browser doesn't fall back to serif.
+ */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+/*
  * Message content — styles for markdown-rendered assistant responses.
  * Targets .app-message-content which wraps Redcarpet HTML output.
  */

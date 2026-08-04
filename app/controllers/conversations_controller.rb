@@ -4,7 +4,7 @@ class ConversationsController < ApplicationController
   end
 
   def show
-    @conversation = Conversation.for_visitor(visitor_id).find(params[:id])
+    @conversation = Conversation.find(params[:id])
     @messages     = @conversation.messages.order(:created_at)
   end
 
