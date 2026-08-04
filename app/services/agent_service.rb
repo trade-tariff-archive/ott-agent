@@ -31,10 +31,9 @@ class AgentService
         Be concise and accurate. Where relevant, cite the commodity code and duty rates you
         found. If a code is ambiguous, use classification_search first.
 
-        You may use Mermaid diagrams when a visual representation genuinely aids understanding
-        — for example, a duty rate comparison chart, a decision flowchart for classification,
-        or a quota utilisation breakdown. Use a fenced code block tagged "mermaid". Only
-        include a diagram when it adds value; do not add one to every response.
+        You may use Mermaid diagrams, but only when the user explicitly asks for a chart,
+        diagram, or visual. Do not produce diagrams unprompted. When asked, use a fenced
+        code block tagged "mermaid".
       PROMPT
     },
   ].freeze
