@@ -1,0 +1,108 @@
+<h1 class="govuk-heading-l">Dashboard</h1>
+
+<h2 class="govuk-heading-m">Overview</h2>
+
+<div class="app-stat-grid govuk-!-margin-bottom-6">
+  <div class="app-stat-card">
+    <div class="app-stat-card__value"><%= number_with_delimiter(@total_conversations) %></div>
+    <div class="app-stat-card__label">Conversations</div>
+  </div>
+  <div class="app-stat-card">
+    <div class="app-stat-card__value"><%= number_with_delimiter(@total_messages) %></div>
+    <div class="app-stat-card__label">Messages</div>
+  </div>
+  <div class="app-stat-card">
+    <div class="app-stat-card__value"><%= number_with_delimiter(@total_tokens) %></div>
+    <div class="app-stat-card__label">Tokens used</div>
+  </div>
+  <div class="app-stat-card">
+    <div class="app-stat-card__value"><%= number_with_delimiter(@total_intents) %></div>
+    <div class="app-stat-card__label">Active watchlist alerts</div>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Latency (assistant responses)</h2>
+
+<% if @avg_latency %>
+  <div class="app-stat-grid govuk-!-margin-bottom-6">
+    <div class="app-stat-card">
+      <div class="app-stat-card__value"><%= @avg_latency %>s</div>
+      <div class="app-stat-card__label">Average</div>
+    </div>
+    <div class="app-stat-card">
+      <div class="app-stat-card__value"><%= @p50_latency %>s</div>
+      <div class="app-stat-card__label">p50</div>
+    </div>
+    <div class="app-stat-card">
+      <div class="app-stat-card__value"><%= @p95_latency %>s</div>
+      <div class="app-stat-card__label">p95</div>
+    </div>
+  </div>
+<% else %>
+  <p class="govuk-body govuk-hint govuk-!-margin-bottom-6">No response data yet.</p>
+<% end %>
+
+<h2 class="govuk-heading-m">Token usage (per response)</h2>
+
+<div class="app-stat-grid govuk-!-margin-bottom-6">
+  <div class="app-stat-card">
+    <div class="app-stat-card__value"><%= number_with_delimiter(@avg_input_tokens) %></div>
+    <div class="app-stat-card__label">Avg input tokens</div>
+  </div>
+  <div class="app-stat-card">
+    <div class="app-stat-card__value"><%= number_with_delimiter(@avg_output_tokens) %></div>
+    <div class="app-stat-card__label">Avg output tokens</div>
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Conversations per day (last 7 days)</h2>
+
+<% if @daily_counts.any? %>
+  <table class="govuk-table govuk-!-margin-bottom-6">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th class="govuk-table__header">Date</th>
+        <th class="govuk-table__header govuk-table__header--numeric">Conversations</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <% @daily_counts.each do |date, count| %>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell"><%= date.strftime("%d %b %Y") %></td>
+          <td class="govuk-table__cell govuk-table__cell--numeric"><%= count %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="govuk-body govuk-hint govuk-!-margin-bottom-6">No conversations in the last 7 days.</p>
+<% end %>
+
+<h2 class="govuk-heading-m">Recent conversations</h2>
+
+<% if @recent_conversations.any? %>
+  <table class="govuk-table">
+    <thead class="govuk-table__head">
+      <tr class="govuk-table__row">
+        <th class="govuk-table__header">Title</th>
+        <th class="govuk-table__header govuk-table__header--numeric">Messages</th>
+        <th class="govuk-table__header govuk-table__header--numeric">Tokens</th>
+        <th class="govuk-table__header">Started</th>
+      </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+      <% @recent_conversations.each do |conversation| %>
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell">
+            <%= link_to conversation.title.truncate(60), conversation_path(conversation), class: "govuk-link" %>
+          </td>
+          <td class="govuk-table__cell govuk-table__cell--numeric"><%= conversation.messages.size %></td>
+          <td class="govuk-table__cell govuk-table__cell--numeric"><%= number_with_delimiter(conversation.total_tokens) %></td>
+          <td class="govuk-table__cell"><%= conversation.created_at.strftime("%d %b %Y %H:%M") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p class="govuk-body govuk-hint">No conversations yet.</p>
+<% end %>

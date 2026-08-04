@@ -6,7 +6,7 @@ module ApplicationHelper
 
   MARKDOWN_ALLOWED_TAGS = %w[p br strong em code pre h1 h2 h3 h4 ul ol li blockquote table thead tbody tr th td a hr].freeze
 
-  COMMODITY_CODE_PATTERN = /\b(\d{10})\b/.freeze
+  COMMODITY_CODE_PATTERN = /\b(\d{4} \d{2} \d{2} \d{2}|\d{10})\b/.freeze
   TARIFF_BASE_URL = "https://www.trade-tariff.service.gov.uk/commodities/".freeze
 
   def render_markdown(text)
@@ -19,7 +19,8 @@ module ApplicationHelper
 
   def link_commodity_codes(html)
     html.gsub(COMMODITY_CODE_PATTERN) do |code|
-      %(<a href="#{TARIFF_BASE_URL}#{code}" class="govuk-link" target="_blank" rel="noopener noreferrer">#{code}</a>)
+      bare = code.delete(" ")
+      %(<a href="#{TARIFF_BASE_URL}#{bare}" class="govuk-link" target="_blank" rel="noopener noreferrer">#{code}</a>)
     end
   end
 end
