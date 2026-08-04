@@ -1,21 +1,20 @@
 ARG RUBY_VERSION=4.0.5
-ARG ALPINE_VERSION=3.23
 
-FROM ruby:${RUBY_VERSION}-alpine${ALPINE_VERSION} AS builder
+FROM ruby:${RUBY_VERSION}-slim AS builder
 
 WORKDIR /app
 
-RUN apk add --update --no-cache \
-  build-base \
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+  build-essential \
   git \
-  openssl-dev \
-  yaml-dev \
-  postgresql-dev \
+  libssl-dev \
+  libyaml-dev \
+  libpq-dev \
   tzdata \
-  && cp /usr/share/zoneinfo/Europe/London /etc/localtime \
-  && echo "Europe/London" > /etc/timezone
+  && ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime \
+  && echo "Europe/London" > /etc/timezone \
+  && rm -rf /var/lib/apt/lists/*
 
-RUN bundle config set without "development test"
 COPY .ruby-version Gemfile Gemfile.lock /app/
 RUN bundle install --jobs=4 --no-binstubs
 
@@ -29,14 +28,15 @@ RUN rm -rf log tmp \
   && find /usr/local/bundle/gems -name "*.c" -delete \
   && find /usr/local/bundle/gems -name "*.h" -delete
 
-FROM ruby:${RUBY_VERSION}-alpine${ALPINE_VERSION}
+FROM ruby:${RUBY_VERSION}-slim
 
 WORKDIR /app
 
-RUN apk add --update --no-cache \
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
   postgresql-client \
   tzdata \
-  && cp /usr/share/zoneinfo/Europe/London /etc/localtime
+  && ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 COPY --from=builder /app /app
