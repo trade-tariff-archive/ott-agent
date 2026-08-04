@@ -112,6 +112,7 @@ GEM
     cronex (0.15.0)
       tzinfo
       unicode (>= 0.4.4.5)
+    csv (3.3.6)
     date (3.5.1)
     diff-lcs (1.6.2)
     dotenv (3.2.0)
@@ -412,6 +413,7 @@ DEPENDENCIES
   bootsnap
   brakeman
   bundler-audit
+  csv
   dotenv-rails
   factory_bot_rails
   faraday (~> 2.12)
@@ -465,6 +467,7 @@ CHECKSUMS
   crack (1.0.1) sha256=ff4a10390cd31d66440b7524eb1841874db86201d5b70032028553130b6d4c7e
   crass (1.0.7) sha256=94868719948664c89ddcaf0a37c65048413dfcb1c869470a5f7a7ceb5390b295
   cronex (0.15.0) sha256=21c794e085fad2951c4f2e279f440340a35ba2297e0b738f22f263f69fbe2186
+  csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
   date (3.5.1) sha256=750d06384d7b9c15d562c76291407d89e368dda4d4fff957eb94962d325a0dc0
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
   dotenv (3.2.0) sha256=e375b83121ea7ca4ce20f214740076129ab8514cd81378161f11c03853fe619d

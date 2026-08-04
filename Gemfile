@@ -25,6 +25,7 @@ gem "sidekiq", "~> 7.3"
 gem "sidekiq-cron", "~> 2.0"
 
 gem "bootsnap", require: false
+gem "csv"
 gem "redcarpet", "~> 3.6"
 
 group :development, :test do
