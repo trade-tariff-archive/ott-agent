@@ -15,7 +15,7 @@ gem "faraday-retry"
 
 gem "aws-sdk-bedrockruntime"
 
-gem "redis", "~> 5.0"
+gem "redis", "~> 6.0"
 gem "turbo-rails"
 
 gem "govuk-components"
