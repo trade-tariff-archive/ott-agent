@@ -4,8 +4,10 @@ class ConversationsController < ApplicationController
   end
 
   def show
-    @conversation = Conversation.find(params[:id])
-    @messages     = @conversation.messages.order(:created_at)
+    @conversation = Conversation.for_visitor(visitor_id).find_by(id: params[:id])
+    return head :not_found unless @conversation
+
+    @messages = @conversation.messages.order(:created_at)
   end
 
   def create

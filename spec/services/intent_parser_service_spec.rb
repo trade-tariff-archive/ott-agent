@@ -9,7 +9,7 @@ RSpec.describe IntentParserService do
           message: double(
             content: [
               double(
-                text: '{"commodity_code":"0101210000","description":"Monitor duty rate changes on live horses"}',
+                text: '{"type":"commodity","identifier":"0101210000","description":"Monitor duty rate changes on live horses"}',
                 tool_use: nil,
               ),
             ],
