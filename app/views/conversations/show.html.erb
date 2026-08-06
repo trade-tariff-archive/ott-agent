@@ -2,6 +2,8 @@
 
 <h1 class="govuk-heading-l"><%= @conversation.title %></h1>
 
+<div id="agent-status" class="govuk-body-s govuk-hint govuk-!-margin-bottom-2"></div>
+
 <div class="govuk-!-margin-bottom-6">
   <% @messages.each do |message| %>
     <div class="govuk-inset-text govuk-!-margin-bottom-3">
@@ -19,7 +21,9 @@
   <% if @messages.last&.role == "user" %>
     <div class="govuk-inset-text govuk-!-margin-bottom-3">
       <p class="govuk-caption-m govuk-!-margin-bottom-1">Assistant</p>
-      <p class="govuk-body govuk-hint app-thinking">Thinking<span class="app-thinking__dots"><span>.</span><span>.</span><span>.</span></span></p>
+      <div id="streaming-message-content" class="app-message-content">
+        <p class="govuk-body govuk-hint app-thinking">Thinking<span class="app-thinking__dots"><span>.</span><span>.</span><span>.</span></span></p>
+      </div>
     </div>
   <% end %>
 
