@@ -35,7 +35,7 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "rspec-rails", "~> 7.0"
   gem "rubocop-govuk", require: false
-  gem "shoulda-matchers", "~> 6.0"
+  gem "shoulda-matchers", "~> 8.0"
   gem "webmock"
 end
 
