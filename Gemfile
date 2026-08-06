@@ -21,7 +21,7 @@ gem "turbo-rails"
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
 
-gem "sidekiq", "~> 7.3"
+gem "sidekiq", "~> 8.1"
 gem "sidekiq-cron", "~> 2.0"
 
 gem "bootsnap", require: false
@@ -33,7 +33,7 @@ group :development, :test do
   gem "bundler-audit", require: false
   gem "dotenv-rails"
   gem "factory_bot_rails"
-  gem "rspec-rails", "~> 7.0"
+  gem "rspec-rails", "~> 8.0"
   gem "rubocop-govuk", require: false
   gem "shoulda-matchers", "~> 8.0"
   gem "webmock"
