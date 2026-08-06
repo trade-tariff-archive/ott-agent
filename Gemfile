@@ -21,7 +21,7 @@ gem "turbo-rails"
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
 
-gem "sidekiq", "~> 7.3"
+gem "sidekiq", "~> 8.1"
 gem "sidekiq-cron", "~> 2.0"
 
 gem "bootsnap", require: false
