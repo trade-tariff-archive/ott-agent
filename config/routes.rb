@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount ActionCable::Server::Base, at: "/cable"
+
   resources :conversations, only: %i[index show create] do
     resources :messages, only: %i[create]
   end
