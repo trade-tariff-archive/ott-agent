@@ -35,6 +35,7 @@ RSpec.describe AgentService do
   before do
     allow(McpClient).to receive(:list_tools).and_return(mcp_tools)
     allow(Turbo::StreamsChannel).to receive(:broadcast_update_to)
+    allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to)
     stub_end_turn_stream(text: "The duty rate is 0%.")
   end
 
@@ -126,10 +127,10 @@ RSpec.describe AgentService do
         expect(message.output_tokens).to eq(50)
       end
 
-      it "broadcasts the tool name to agent-status" do
+      it "broadcasts the final message to replace the streaming placeholder" do
         AgentService.respond(conversation)
-        expect(Turbo::StreamsChannel).to have_received(:broadcast_update_to)
-          .with(conversation, target: "agent-status", html: "Using tool: lookup_commodity")
+        expect(Turbo::StreamsChannel).to have_received(:broadcast_replace_to)
+          .with(conversation, target: "assistant-response-pending", html: anything)
       end
     end
 

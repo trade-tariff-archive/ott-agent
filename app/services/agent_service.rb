@@ -81,7 +81,6 @@ class AgentService
             name:        tool.name,
             input_json:  +"",
           }
-          broadcast_status(conversation, "Using tool: #{tool.name}")
         end
 
         stream.on_content_block_delta_event do |event|
@@ -160,14 +159,18 @@ class AgentService
 
     latency = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
 
-    message = conversation.messages.create!(
-      role:            "assistant",
-      content:         final_text,
-      input_tokens:    total_input_tokens,
-      output_tokens:   total_output_tokens,
-      latency_seconds: latency,
-    )
+    message = nil
+    Message.suppressing_turbo_broadcasts do
+      message = conversation.messages.create!(
+        role:            "assistant",
+        content:         final_text,
+        input_tokens:    total_input_tokens,
+        output_tokens:   total_output_tokens,
+        latency_seconds: latency,
+      )
+    end
 
+    broadcast_final_message(conversation, message)
     broadcast_status_clear(conversation)
     message
   end
@@ -207,23 +210,27 @@ class AgentService
   end
   private_class_method :extract_text
 
-  def self.broadcast_streaming_text(conversation, text)
-    Turbo::StreamsChannel.broadcast_update_to(
-      conversation,
-      target: "streaming-message-content",
-      html:   MarkdownRenderer.render(text),
-    )
-  end
-  private_class_method :broadcast_streaming_text
+  def self.broadcast_final_message(conversation, message)
+    tokens = message.input_tokens + message.output_tokens
+    token_info = if tokens > 0
+      " · #{ActiveSupport::NumberHelper.number_to_delimited(tokens)} tokens · #{message.latency_seconds.round(1)}s"
+    else
+      ""
+    end
 
-  def self.broadcast_status(conversation, status_text)
-    Turbo::StreamsChannel.broadcast_update_to(
+    html = <<~HTML
+      <div class="govuk-inset-text govuk-!-margin-bottom-3">
+        <p class="govuk-caption-m govuk-!-margin-bottom-1">Assistant#{token_info}</p>
+        <div class="app-message-content">#{MarkdownRenderer.render(message.content)}</div>
+      </div>
+    HTML
+
+    Turbo::StreamsChannel.broadcast_replace_to(
       conversation,
-      target: "agent-status",
-      html:   status_text,
+      target: "assistant-response-pending",
+      html:   html,
     )
   end
-  private_class_method :broadcast_status
 
   def self.broadcast_status_clear(conversation)
     Turbo::StreamsChannel.broadcast_update_to(
@@ -232,5 +239,13 @@ class AgentService
       html:   "",
     )
   end
-  private_class_method :broadcast_status_clear
+
+  def self.broadcast_streaming_text(conversation, text)
+    Turbo::StreamsChannel.broadcast_update_to(
+      conversation,
+      target: "streaming-message-content",
+      html:   MarkdownRenderer.render(text),
+    )
+  end
+  private_class_method :broadcast_streaming_text
 end
