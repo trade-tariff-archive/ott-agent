@@ -159,16 +159,13 @@ class AgentService
 
     latency = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
 
-    message = nil
-    Message.suppressing_turbo_broadcasts do
-      message = conversation.messages.create!(
-        role:            "assistant",
-        content:         final_text,
-        input_tokens:    total_input_tokens,
-        output_tokens:   total_output_tokens,
-        latency_seconds: latency,
-      )
-    end
+    message = conversation.messages.create!(
+      role:            "assistant",
+      content:         final_text,
+      input_tokens:    total_input_tokens,
+      output_tokens:   total_output_tokens,
+      latency_seconds: latency,
+    )
 
     broadcast_final_message(conversation, message)
     broadcast_status_clear(conversation)
