@@ -209,23 +209,21 @@ class AgentService
 
   def self.broadcast_final_message(conversation, message)
     tokens = message.input_tokens + message.output_tokens
-    token_info = if tokens > 0
-      " · #{ActiveSupport::NumberHelper.number_to_delimited(tokens)} tokens · #{message.latency_seconds.round(1)}s"
+    caption = if tokens > 0
+      "Assistant · #{ActiveSupport::NumberHelper.number_to_delimited(tokens)} tokens · #{message.latency_seconds.round(1)}s"
     else
-      ""
+      "Assistant"
     end
 
-    html = <<~HTML
-      <div class="govuk-inset-text govuk-!-margin-bottom-3">
-        <p class="govuk-caption-m govuk-!-margin-bottom-1">Assistant#{token_info}</p>
-        <div class="app-message-content">#{MarkdownRenderer.render(message.content)}</div>
-      </div>
-    HTML
-
-    Turbo::StreamsChannel.broadcast_replace_to(
+    Turbo::StreamsChannel.broadcast_update_to(
       conversation,
-      target: "assistant-response-pending",
-      html:   html,
+      target: "streaming-message-content",
+      html:   MarkdownRenderer.render(message.content),
+    )
+    Turbo::StreamsChannel.broadcast_update_to(
+      conversation,
+      target: "assistant-response-caption",
+      html:   caption,
     )
   end
 
