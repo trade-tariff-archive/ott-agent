@@ -107,6 +107,10 @@ class AgentService
         stream.on_message_stop_event do |event|
           stop_reason = event.stop_reason
         end
+
+        stream.on_error_event do |event|
+          Rails.logger.error "Bedrock stream error for conversation #{conversation.id}: #{event.inspect}"
+        end
       end
 
       broadcast_streaming_text(conversation, current_text) if current_text.present?
@@ -121,14 +125,24 @@ class AgentService
       end
 
       tool_results = tool_use_blocks.values.map do |block|
-        input  = JSON.parse(block[:input_json])
-        result = McpClient.call_tool(block[:name], input)
-        {
-          tool_result: {
-            tool_use_id: block[:tool_use_id],
-            content:     [{ text: result }],
-          },
-        }
+        input = JSON.parse(block[:input_json])
+        begin
+          result = McpClient.call_tool(block[:name], input)
+          {
+            tool_result: {
+              tool_use_id: block[:tool_use_id],
+              content:     [{ text: result }],
+            },
+          }
+        rescue McpClient::Error => e
+          {
+            tool_result: {
+              tool_use_id: block[:tool_use_id],
+              content:     [{ text: e.message }],
+              status:      "error",
+            },
+          }
+        end
       end
 
       messages << { role: "user", content: tool_results }

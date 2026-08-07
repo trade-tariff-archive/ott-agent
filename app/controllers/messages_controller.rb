@@ -3,7 +3,7 @@ class MessagesController < ApplicationController
     @conversation = Conversation.for_visitor(visitor_id).find(params[:conversation_id])
 
     if @conversation.messages.order(:created_at).last&.role == "user"
-      redirect_to @conversation, alert: "Please wait for the current response." and return
+      redirect_to @conversation and return
     end
 
     content = params[:content].to_s.strip
