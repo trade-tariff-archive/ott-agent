@@ -1,8 +1,8 @@
 class DashboardController < ApplicationController
-  SONNET_INPUT_PRICE_PER_M  = 3.0
-  SONNET_OUTPUT_PRICE_PER_M = 15.0
-  HAIKU_INPUT_PRICE_PER_M   = 1.0
-  HAIKU_OUTPUT_PRICE_PER_M  = 5.0
+  NOVA_PRO_INPUT_PRICE_PER_M  = 0.80
+  NOVA_PRO_OUTPUT_PRICE_PER_M = 3.20
+  HAIKU_INPUT_PRICE_PER_M     = 1.0
+  HAIKU_OUTPUT_PRICE_PER_M    = 5.0
 
   def index
     assistant_messages = Message.where(role: "assistant")
@@ -33,13 +33,13 @@ private
   def estimated_cost
     alert_conv_ids = Conversation.where("title LIKE 'Alert:%'").pluck(:id)
 
-    haiku_msgs  = Message.where(role: "assistant", conversation_id: alert_conv_ids)
-    sonnet_msgs = Message.where(role: "assistant").where.not(conversation_id: alert_conv_ids)
+    haiku_msgs    = Message.where(role: "assistant", conversation_id: alert_conv_ids)
+    nova_pro_msgs = Message.where(role: "assistant").where.not(conversation_id: alert_conv_ids)
 
-    haiku_cost  = token_cost(haiku_msgs,  HAIKU_INPUT_PRICE_PER_M,  HAIKU_OUTPUT_PRICE_PER_M)
-    sonnet_cost = token_cost(sonnet_msgs, SONNET_INPUT_PRICE_PER_M, SONNET_OUTPUT_PRICE_PER_M)
+    haiku_cost    = token_cost(haiku_msgs,    HAIKU_INPUT_PRICE_PER_M,    HAIKU_OUTPUT_PRICE_PER_M)
+    nova_pro_cost = token_cost(nova_pro_msgs, NOVA_PRO_INPUT_PRICE_PER_M, NOVA_PRO_OUTPUT_PRICE_PER_M)
 
-    haiku_cost + sonnet_cost
+    haiku_cost + nova_pro_cost
   end
 
   def token_cost(scope, input_price, output_price)

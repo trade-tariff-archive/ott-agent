@@ -1,5 +1,5 @@
 class AgentService
-  INTERACTIVE_MODEL   = "anthropic.claude-sonnet-4-6".freeze
+  INTERACTIVE_MODEL   = "eu.anthropic.claude-haiku-4-5-20251001-v1:0".freeze
   SCHEDULED_MODEL     = "eu.anthropic.claude-haiku-4-5-20251001-v1:0".freeze
   MAX_TOOL_ITERATIONS = 10
   STREAM_FLUSH_INTERVAL = 0.15 # seconds between progressive broadcasts
@@ -225,7 +225,7 @@ class AgentService
     Turbo::StreamsChannel.broadcast_replace_to(
       conversation,
       target: "assistant-response-pending",
-      html:   html,
+      html:   html.html_safe,
     )
   end
 
@@ -241,7 +241,7 @@ class AgentService
     Turbo::StreamsChannel.broadcast_update_to(
       conversation,
       target: "streaming-message-content",
-      html:   MarkdownRenderer.render(text),
+      html:   MarkdownRenderer.render(text).html_safe,
     )
   end
   private_class_method :broadcast_streaming_text

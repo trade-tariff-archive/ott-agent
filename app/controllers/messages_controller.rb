@@ -35,8 +35,8 @@ class MessagesController < ApplicationController
         HTML
 
         render turbo_stream: [
-          turbo_stream.before("messages-bottom", html: user_html),
-          turbo_stream.before("messages-bottom", html: pending_html),
+          turbo_stream.before("messages-bottom", html: user_html.html_safe),
+          turbo_stream.before("messages-bottom", html: pending_html.html_safe),
         ]
       end
       format.html { redirect_to @conversation }
