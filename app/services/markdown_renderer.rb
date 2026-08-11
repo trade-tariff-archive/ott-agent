@@ -14,7 +14,7 @@ class MarkdownRenderer
 
   COMMODITY_CODE_PATTERN = /\b(\d{4} \d{2} \d{2} \d{2}|\d{10})\b/
   TARIFF_BASE_URL = "https://www.trade-tariff.service.gov.uk/commodities/".freeze
-  MERMAID_BLOCK_PATTERN = /<pre><code class="language-mermaid">(.*?)<\/code><\/pre>/m
+  MERMAID_BLOCK_PATTERN = /<pre><code class="(?:language-)?mermaid">(.*?)<\/code><\/pre>/m
 
   def self.render(text)
     return "" if text.blank?

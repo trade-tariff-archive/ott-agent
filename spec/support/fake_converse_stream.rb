@@ -26,6 +26,10 @@ class FakeConverseStream
     @handlers[:metadata] = block
   end
 
+  def on_error_event(&block)
+    @handlers[:error] = block
+  end
+
   def emit_text_delta(text, index: 0)
     @handlers[:content_block_delta]&.call(
       double(

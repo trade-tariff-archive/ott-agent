@@ -4,7 +4,7 @@ class ConversationsController < ApplicationController
   end
 
   def show
-    @conversation = Conversation.find_by(id: params[:id])
+    @conversation = Conversation.find_by(id: params[:id], visitor_id: visitor_id)
     return head :not_found unless @conversation
 
     @messages = @conversation.messages.order(:created_at)
