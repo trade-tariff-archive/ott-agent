@@ -10,7 +10,7 @@ gem "propshaft"
 gem "puma", ">= 5.0"
 gem "rails", "~> 8.1"
 
-gem "faraday", "~> 2.12"
+gem "faraday", "~> 2.14"
 gem "faraday-retry"
 
 gem "aws-sdk-bedrockruntime"
