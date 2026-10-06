@@ -5,7 +5,7 @@ source "https://rubygems.org"
 ruby file: ".ruby-version"
 
 gem "importmap-rails"
-gem "pg", "~> 1.5"
+gem "pg", "~> 1.7"
 gem "propshaft"
 gem "puma", ">= 5.0"
 gem "rails", "~> 8.1"
